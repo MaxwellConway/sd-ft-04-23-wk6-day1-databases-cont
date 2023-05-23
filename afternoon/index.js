@@ -114,7 +114,6 @@ app.put("/update_recipe/:id", (req, res) => {
 
 app.delete("/delete_recipe/:id", (req, res) => {
   const { id } = req.params;
-  const { recipeUpdate } = req.body;
   pool.connect((err, client, release) => {
     if (err) {
       release();
@@ -122,8 +121,8 @@ app.delete("/delete_recipe/:id", (req, res) => {
       res.status(500).send("Internal service error");
     }
 
-    const sqlQuery = `UPDATE recipes SET recipe_name=$2 WHERE id=$1;`;
-    const values = [id, recipeUpdate];
+    const sqlQuery = `DELETE FROM recipes WHERE id=$1;`;
+    const values = [id];
 
     client.query(sqlQuery, values, (err, result) => {
       release();

@@ -260,6 +260,127 @@ app.delete("/delete_customer/:id", (req, res) => {
   });
 });
 
+// ORDERS ROUTES
+app.get("/orders", (req, res) => {
+  pool.connect((err, client, release) => {
+    if (err) {
+      release();
+      console.error("Error connecting to the database: ", err);
+      res.status(500).send("Internal service error");
+    }
+
+    const sqlQuery = `SELECT * FROM orders;`;
+
+    client.query(sqlQuery, (err, result) => {
+      release();
+      if (err) {
+        console.error("Error in executing the query: ", err);
+        res.status(500).send("Internal server error");
+        return;
+      }
+      res.send(result.rows);
+    });
+  });
+});
+
+app.post("/new_order", (req, res) => {
+  const { customerId, recipeId } = req.body;
+  //const newOrder = req.body.newOrder;
+
+  pool.connect((err, client, release) => {
+    if (err) {
+      release();
+      console.error("Error connecting to the database: ", err);
+      res.status(500).send("Internal service error");
+    }
+
+    const sqlQuery = `INSERT INTO orders (customer_id, recipe_id) VALUES ($1, $2);`;
+    const values = [customerId, recipeId];
+
+    client.query(sqlQuery, values, (err, result) => {
+      release();
+      if (err) {
+        console.error("Error in executing the query: ", err);
+        res.status(500).send("Internal server error");
+        return;
+      }
+      res.send(result);
+    });
+  });
+});
+
+app.get("/get_order/:id", (req, res) => {
+  const { id } = req.params;
+  pool.connect((err, client, release) => {
+    if (err) {
+      release();
+      console.error("Error connecting to the database: ", err);
+      res.status(500).send("Internal service error");
+    }
+
+    const sqlQuery = `SELECT * FROM orders WHERE id=$1;`;
+    const values = [id];
+
+    client.query(sqlQuery, values, (err, result) => {
+      release();
+      if (err) {
+        console.error("Error in executing the query: ", err);
+        res.status(500).send("Internal server error");
+        return;
+      }
+      res.send(result.rows);
+    });
+  });
+});
+
+app.put("/update_order/:id", (req, res) => {
+  const { id } = req.params;
+  const { customerId, recipeId } = req.body;
+  pool.connect((err, client, release) => {
+    if (err) {
+      release();
+      console.error("Error connecting to the database: ", err);
+      res.status(500).send("Internal service error");
+    }
+
+    const sqlQuery = `UPDATE orders SET customer_id=$2, recipe_id=$3 WHERE id=$1;`;
+    const values = [id, customerId, recipeId];
+
+    client.query(sqlQuery, values, (err, result) => {
+      release();
+      if (err) {
+        console.error("Error in executing the query: ", err);
+        res.status(500).send("Internal server error");
+        return;
+      }
+      res.send(result);
+    });
+  });
+});
+
+app.delete("/delete_order/:id", (req, res) => {
+  const { id } = req.params;
+  pool.connect((err, client, release) => {
+    if (err) {
+      release();
+      console.error("Error connecting to the database: ", err);
+      res.status(500).send("Internal service error");
+    }
+
+    const sqlQuery = `DELETE FROM orders WHERE id=$1;`;
+    const values = [id];
+
+    client.query(sqlQuery, values, (err, result) => {
+      release();
+      if (err) {
+        console.error("Error in executing the query: ", err);
+        res.status(500).send("Internal server error");
+        return;
+      }
+      res.send(result);
+    });
+  });
+});
 // Start the server
 const port = 3000; // Update with your desired port number
 app.listen(port, () => {
